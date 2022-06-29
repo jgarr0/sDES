@@ -73,15 +73,19 @@ class sDES:
         R_P10 = self.circularLeftShift(TMP_P10[5:])
         # combine right and left
         P10 = (0x3FF & (L_P10 << 5) )| R_P10
-        format(P10, '#012b')
-
-        #EXTEND P10 to 10 bits; and to make P8
+        print("P10: ", P10)
         # form K1
-        P8_LST = list(bin(0x3FF)[2:])
-        print(P8_LST)
-        for i in range(0, len(P8_LST)):
-            P8_LST[i] = list(bin(P10)[self.P8_T[i]-1])
-        print(P8_LST)
+        P8_LST = ""
+        print("P8_LST: ", P8_LST)
+        P10_LST = bin(P10)[2:].zfill(10)
+        print("P10_LST: ", P10_LST)
+
+        # Permutate P10_LST with P8 to derive the first key 
+        for i in range(0, len(self.P8_T)): 
+            P8_LST += P10_LST[(self.P8_T[i]-1)]
+        print("First Key: ", P8_LST)
+
+
 
 # main
 key = 0x282                             # 10 bit key
