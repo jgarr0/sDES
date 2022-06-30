@@ -81,9 +81,6 @@ class sDES:
         P10 = (0x3FF & (L_P10 << 5) )| R_P10
 
         # form K1
-        #P10_LST = bin(P10)[2:].zfill(10)
-        #print("P10_LST: ", P10_LST)
-
         # Permutate P10_LST with P8 to derive the first key 
         self.K1 = self.permutate(P10, self.P8_T)
         print("First Key: ", self.K1)
@@ -95,7 +92,6 @@ class sDES:
 
         # form k2
         P8 = (0x3FF & (L3_P10 << 5) )| R3_P10
-        #P8_LST = bin(P8)[2:].zfill(10)
 
         # Permutate to derive the second key 
         self.K2 = self.permutate(P8, self.P8_T)
@@ -103,13 +99,74 @@ class sDES:
 
     def encrypt(self):
         permuted_input = self.permutate(self.plaintext, self.IP, 8)
-        
+        print("permuted input:", permuted_input)
+        right_input = int(permuted_input[4:], base=2)
+        left_input = int(permuted_input[:-4], base=2)
+        print("right input", right_input)
+        print("left input", left_input)
+        ep_right = self.permutate(right_input, self.E, 4)
+        print("RGT ", ep_right)
+        print("K1: ", self.K1)
+        res = int(ep_right, base=2) ^ int(self.K1, base=2)
+        print(res)
 
+        # get rightmost 4 bits
+        s0_input = res >> 4
+        s0_row = (((s0_input >> 3) << 1) | (s0_input & 1)) & 3
+        s0_col = (s0_input >> 1) & 3
+        s0_res = self.S0[s0_row][s0_col]
+        print(s0_row, s0_col, s0_res)
+        # get leftmost 4 bits
+        s1_input = res & 0xF
+        s1_row = (((s1_input >> 3) << 1) | (s1_input & 1)) & 3
+        s1_col = (s1_input >> 1) & 3
+        s1_res = self.S1[s1_row][s1_col]
+        print(s1_row, s1_col, s1_res)
+
+        p4_res = self.permutate((s0_res << 2) | s1_res, self.P4, 4)
+        top_output = int(p4_res, base=2) ^ left_input
+        print("TOP OUTPUT:", top_output)
+
+        # BOTTOM BOX
+        ep_left = self.permutate(top_output, self.E, 4)
+        #print("LFT ", ep_left)
+        print("K2: ", self.K2)
+        res = int(ep_left, base=2) ^ int(self.K2, base=2)
+        print(res)
+
+        # get rightmost 4 bits
+        s0_input = res >> 4
+        s0_row = (((s0_input >> 3) << 1) | (s0_input & 1)) & 3
+        s0_col = (s0_input >> 1) & 3
+        s0_res = self.S0[s0_row][s0_col]
+        print(s0_row, s0_col, s0_res)
+        # get leftmost 4 bits
+        s1_input = res & 0xF
+        s1_row = (((s1_input >> 3) << 1) | (s1_input & 1)) & 3
+        s1_col = (s1_input >> 1) & 3
+        s1_res = self.S1[s1_row][s1_col]
+        print(s1_row, s1_col, s1_res)
+
+        p4_res = self.permutate((s0_res << 2) | s1_res, self.P4, 4)
+        print(p4_res)
+        print(right_input)
+        bottom_output = int(p4_res, base=2) ^ right_input
+        print("BOT OUTPUT:", bottom_output)
+        # compute final cipher text
+        print(bottom_output << 4 | top_output)
+        self.cyphertext = self.permutate((bottom_output << 4) | top_output, self.IP_INV, 8)
+        print("cyphertext:", self.cyphertext)
+
+                    
 # main
-key = 0x282                             # 10 bit key
-plaintext = 0xF3                        #  8 bit plaintext
+key = 0x097                             # 10 bit key
+plaintext = 0xA5                        #  8 bit plaintext
+
+#key = 0x282
+#plaintext = 0xF3
 
 test = sDES(key, plaintext)
-print(hex(test.key))
+print("key :",bin(test.key))
+print("text:",bin(test.plaintext))
 test.deriveKeys() 
 test.encrypt()
