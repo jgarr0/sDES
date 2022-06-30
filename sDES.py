@@ -98,6 +98,14 @@ class sDES:
         print("Second Key: ", self.K2)
 
     def encrypt(self):
+        if((not self.key or self.key == 0) or (not self.plaintext or self.plaintext == 0)):
+            print("You need to provide a non-empty key and plaintext")
+            return
+        #otherwise encrypt
+        #derive keys
+        self.deriveKeys()
+
+        # begin encryption process
         permuted_input = self.permutate(self.plaintext, self.IP, 8)
         print("permuted input:", permuted_input)
         right_input = int(permuted_input[4:], base=2)
@@ -168,5 +176,4 @@ plaintext = 0xA5                        #  8 bit plaintext
 test = sDES(key, plaintext)
 print("key :",bin(test.key))
 print("text:",bin(test.plaintext))
-test.deriveKeys() 
 test.encrypt()
