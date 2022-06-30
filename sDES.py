@@ -167,12 +167,12 @@ class sDES:
         return(self.permutate((bottom_output << 4) | top_output, self.IP_INV, 8))
         #print("ciphertext:", self.ciphertext)
 
-    def decrypt(self, key):
+    def decrypt_block(self, block, key):
         # try to form keys
         self.key = key
         self.deriveKeys()
 
-        init = self.permutate(int(self.ciphertext, base=2), self.IP, 8)
+        init = self.permutate(int(block, base=2), self.IP, 8)
         right_input = int(init[4:], base=2)
         left_input = int(init[:-4], base = 2)
         ep_right = self.permutate(right_input, self.E, 4)
@@ -215,7 +215,7 @@ class sDES:
     def encrypt(self):
         p_length = len(self.plaintext)
         if(p_length == 1):
-            self.encrypt_block(self.plaintext)
+            self.encrypt_block(ord(self.plaintext))
             return
         # encrypt many blocks
         for byte in self.plaintext:
@@ -223,28 +223,40 @@ class sDES:
             new_input = self.IV ^ ord(byte)
             ciphertext = self.encrypt_block(new_input)
             self.IV = int(ciphertext, base=2)
-            self.ciphertext += ciphertext
+            self.ciphertext += chr(int(ciphertext, base=2))
         return self.ciphertext
 
+    def decrypt(self, key, IV):
+        c_length = len(self.ciphertext)
+        if(c_length == 1):
+            self.decrypt_block(self.ciphertext, key)
+            return
+        # decrypt many blocks
+        self.IV = IV
+        tmp = ""
+        for byte in self.ciphertext:
+            # XOR 1st block with IV
+            plaintext = self.decrypt_block(bin(ord(byte)), key)
+            tmp += chr(int(plaintext, base=2) ^ self.IV)
+            self.IV = ord(byte)
+        return tmp
 
 # main
 # key = 0x097                             # 10 bit key
 # plaintext = 0xA5                        #  8 bit plaintext
 
-key = 0x282
-plaintext = "sentence"
-IV = 0x55
+key = 0x0AA
+plaintext = "Dr. Tran, Look at all of our progress! We can try adding in an error to this now!"
+IV = 0x52
+
+bruteforceresults = open("bruteforceresults.txt", 'w')
 
 print(bytes(plaintext, 'utf-8'))
 test = sDES(key, plaintext, IV)
 print(test.encrypt())
-
-#test = sDES(key, plaintext)
-#print("key :",bin(test.key))
-#print("text:",bin(test.plaintext)) 
-#test.encrypt()
-#for i in range(0, 1024):
-#    decryptRes = test.decrypt(i)
-#    #print("attempt", i, " = plaintext ", decryptRes)
-#    if(int(decryptRes, base=2) == plaintext):
-#        print("iteration", i, " matches")
+print(test.decrypt(key, IV))
+for i in range(0, 1024):
+     decryptRes = test.decrypt(i, IV)
+     bruteforceresults.write("attempt " + repr(i) + " = plaintext " + repr(decryptRes) + '\n')
+     if(decryptRes == plaintext):
+         bruteforceresults.write("\titeration: " + repr(i) +  "matches\n")
