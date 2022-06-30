@@ -40,12 +40,14 @@ class sDES:
     K1 = ""
     K2 = ""
     key = ""
+    IV = ""
     plaintext = ""
     ciphertext = ""
 
-    def __init__(self, input_key = "", input_plaintext = ""):
+    def __init__(self, input_key = "", input_plaintext = "", IV = ""):
         self.key = input_key & 0x3FF
-        self.plaintext = input_plaintext & 0xFF
+        self.plaintext = input_plaintext
+        self.IV = IV & 0xFF
 
     def circularLeftShift(self, input):
         numbits = len(input)
@@ -97,8 +99,8 @@ class sDES:
         self.K2 = self.permutate(P8, self.P8_T)
         #print("Second Key: ", self.K2)
 
-    def encrypt(self):
-        if((not self.key or self.key == 0) or (not self.plaintext or self.plaintext == 0)):
+    def encrypt_block(self, block):
+        if((not self.key or self.key == 0) or (not block or block == 0)):
             print("You need to provide a non-empty key and plaintext")
             return
         #otherwise encrypt
@@ -106,7 +108,7 @@ class sDES:
         self.deriveKeys()
 
         # begin encryption process
-        permuted_input = self.permutate(self.plaintext, self.IP, 8)
+        permuted_input = self.permutate(block, self.IP, 8)
         #print("permuted input:", permuted_input)
         right_input = int(permuted_input[4:], base=2)
         left_input = int(permuted_input[:-4], base=2)
@@ -138,7 +140,7 @@ class sDES:
         # BOTTOM BOX
         ep_left = self.permutate(top_output, self.E, 4)
         #print("LFT ", ep_left)
-        print("K2: ", self.K2)
+        #print("K2: ", self.K2)
         res = int(ep_left, base=2) ^ int(self.K2, base=2)
         #print(res)
 
@@ -162,7 +164,7 @@ class sDES:
         #print("BOT OUTPUT:", bottom_output)
         # compute final cipher text
         #print(bottom_output << 4 | top_output)
-        self.ciphertext = self.permutate((bottom_output << 4) | top_output, self.IP_INV, 8)
+        return(self.permutate((bottom_output << 4) | top_output, self.IP_INV, 8))
         #print("ciphertext:", self.ciphertext)
 
     def decrypt(self, key):
@@ -210,8 +212,19 @@ class sDES:
         return(self.permutate((bottom_output << 4) | top_output, self.IP_INV, 8))
         #print("plaintext:", self.plaintext)
 
-
-
+    def encrypt(self):
+        p_length = len(self.plaintext)
+        if(p_length == 1):
+            self.encrypt_block(self.plaintext)
+            return
+        # encrypt many blocks
+        for byte in self.plaintext:
+            # XOR 1st block with IV
+            new_input = self.IV ^ ord(byte)
+            ciphertext = self.encrypt_block(new_input)
+            self.IV = int(ciphertext, base=2)
+            self.ciphertext += ciphertext
+        return self.ciphertext
 
 
 # main
@@ -219,15 +232,19 @@ class sDES:
 # plaintext = 0xA5                        #  8 bit plaintext
 
 key = 0x282
-plaintext = 0xF3
+plaintext = "sentence"
+IV = 0x55
 
-test = sDES(key, plaintext)
-print("key :",bin(test.key))
-print("text:",bin(test.plaintext)) 
-test.encrypt()
+print(bytes(plaintext, 'utf-8'))
+test = sDES(key, plaintext, IV)
+print(test.encrypt())
 
-for i in range(0, 1024):
-    decryptRes = test.decrypt(i)
-    #print("attempt", i, " = plaintext ", decryptRes)
-    if(int(decryptRes, base=2) == plaintext):
-        print("iteration", i, " matches")
+#test = sDES(key, plaintext)
+#print("key :",bin(test.key))
+#print("text:",bin(test.plaintext)) 
+#test.encrypt()
+#for i in range(0, 1024):
+#    decryptRes = test.decrypt(i)
+#    #print("attempt", i, " = plaintext ", decryptRes)
+#    if(int(decryptRes, base=2) == plaintext):
+#        print("iteration", i, " matches")
