@@ -142,13 +142,13 @@ class sDES:
         res = int(ep_left, base=2) ^ int(self.K2, base=2)
         #print(res)
 
-        # get rightmost 4 bits
+        # get leftmost 4 bits
         s0_input = res >> 4
         s0_row = (((s0_input >> 3) << 1) | (s0_input & 1)) & 3
         s0_col = (s0_input >> 1) & 3
         s0_res = self.S0[s0_row][s0_col]
         #print(s0_row, s0_col, s0_res)
-        # get leftmost 4 bits
+        # get rightmost 4 bits
         s1_input = res & 0xF
         s1_row = (((s1_input >> 3) << 1) | (s1_input & 1)) & 3
         s1_col = (s1_input >> 1) & 3
