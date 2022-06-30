@@ -114,7 +114,7 @@ class sDES:
         #print("left input", left_input)
         ep_right = self.permutate(right_input, self.E, 4)
        #print("RGT ", ep_right)
-        print("K1: ", self.K1)
+       #print("K1: ", self.K1)
         res = int(ep_right, base=2) ^ int(self.K1, base=2)
        # print(res)
 
@@ -163,9 +163,13 @@ class sDES:
         # compute final cipher text
         #print(bottom_output << 4 | top_output)
         self.ciphertext = self.permutate((bottom_output << 4) | top_output, self.IP_INV, 8)
-        print("ciphertext:", self.ciphertext)
+        #print("ciphertext:", self.ciphertext)
 
-    def decrypt(self): 
+    def decrypt(self, key):
+        # try to form keys
+        self.key = key
+        self.deriveKeys()
+
         init = self.permutate(int(self.ciphertext, base=2), self.IP, 8)
         right_input = int(init[4:], base=2)
         left_input = int(init[:-4], base = 2)
@@ -203,12 +207,13 @@ class sDES:
 
         p4_res = self.permutate((s0_res << 2) | s1_res, self.P4, 4)
         bottom_output = int(p4_res, base=2) ^ right_input
-        self.plaintext = self.permutate((bottom_output << 4) | top_output, self.IP_INV, 8)
-        print("plaintext:", self.plaintext)
+        return(self.permutate((bottom_output << 4) | top_output, self.IP_INV, 8))
+        #print("plaintext:", self.plaintext)
 
 
 
-                    
+
+
 # main
 # key = 0x097                             # 10 bit key
 # plaintext = 0xA5                        #  8 bit plaintext
@@ -218,7 +223,11 @@ plaintext = 0xF3
 
 test = sDES(key, plaintext)
 print("key :",bin(test.key))
-print("text:",bin(test.plaintext))
-test.deriveKeys() 
+print("text:",bin(test.plaintext)) 
 test.encrypt()
-test.decrypt()
+
+for i in range(0, 1024):
+    decryptRes = test.decrypt(i)
+    #print("attempt", i, " = plaintext ", decryptRes)
+    if(int(decryptRes, base=2) == plaintext):
+        print("iteration", i, " matches")
