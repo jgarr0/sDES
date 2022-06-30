@@ -158,17 +158,11 @@ class sDES:
         print("ciphertext:", self.ciphertext)
 
     def decrypt(self): 
-        #print('Decrypt ciphertext:', self.ciphertext)
         init = self.permutate(int(self.ciphertext, base=2), self.IP, 8)
-        #print('init: ', init)
         right_input = int(init[4:], base=2)
-        #print('right_input: ', bin(right_input)[2:].zfill(4))
         left_input = int(init[:-4], base = 2)
-        #print('left input: ', bin(left_input)[2:].zfill(4))
         ep_right = self.permutate(right_input, self.E, 4)
-        #print("Expansion: ", ep_right)
         res = int(ep_right, base=2) ^ int(self.K2, base=2)
-        #print('res: ', bin(res)[2:].zfill(8)) 
 
         s0_input = res >> 4
         s0_row = (((s0_input >> 3) << 1) | (s0_input & 1)) & 3
