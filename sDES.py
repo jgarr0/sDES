@@ -240,23 +240,3 @@ class sDES:
             tmp += chr(int(plaintext, base=2) ^ self.IV)
             self.IV = ord(byte)
         return tmp
-
-# main
-# key = 0x097                             # 10 bit key
-# plaintext = 0xA5                        #  8 bit plaintext
-
-key = 0x0AA
-plaintext = "Dr. Tran, Look at all of our progress! We can try adding in an error to this now!"
-IV = 0x52
-
-bruteforceresults = open("bruteforceresults.txt", 'w')
-
-print(bytes(plaintext, 'utf-8'))
-test = sDES(key, plaintext, IV)
-print(test.encrypt())
-print(test.decrypt(key, IV))
-for i in range(0, 1024):
-     decryptRes = test.decrypt(i, IV)
-     bruteforceresults.write("attempt " + repr(i) + " = plaintext " + repr(decryptRes) + '\n')
-     if(decryptRes == plaintext):
-         bruteforceresults.write("\titeration: " + repr(i) +  "matches\n")
