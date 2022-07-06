@@ -24,6 +24,8 @@ class parser:
             #    print(x.decode())
             x = ptlist.readlines()[169]
             print(x.decode('ascii'))
+            print("\n")
+            print(ord(x))
             #print(str(x[2:].decode()))
             #close file
             ptlist.close()
