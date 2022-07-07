@@ -3,29 +3,43 @@
 
 import sDES
 import time
+import codecs
+import filter
 
 key = 0x0AA
 plaintext = "Dr. Tran, Look at all of our progress! We can try adding in an error to this now!"
 IV = 0x52
 
-bruteforceresults = open("bruteforceresults.txt", 'w')
-
 print(bytes(plaintext, 'utf-8'))
 test = sDES.sDES(key, plaintext, IV)
 print(test.encrypt())
 print(test.decrypt(key, IV))
+
+# regular expression to find desirable plaintexts
+# rule to finlter non prinatable ascii
+rule = r"[^a-zA-Z0-9 -~]+"
+
 # timer
-# Using perf_counter returns value of performance counter with highest available res. (Includes time elapsed during sleep & is system wide)
-t_start = time.perf_counter()
-for i in range(0, 1024):
+# Using process_time returns float of the sum of the system and user CPU time of current process (Excludes time elapsed during sleep & is process wide)
+t_start = time.process_time()
+
+# initalize filter
+destination = 'filtered_bruteforceresults.txt'
+textfilter = filter.filter(destination, rule, 40)
+
+# write cyphertext to output
+textfilter.printcyphertext("no error")
+
+# try all possible key values
+for i in range(0, 1023):
      decryptRes = test.decrypt(i, IV)
-     bruteforceresults.write(str(decryptRes.encode('utf-8', errors='replace')) + "\n")
-     #if(decryptRes == plaintext):
-     #    bruteforceresults.write("\titeration: " + repr(i) +  "matches\n")
+     # call the parser
+     #print(str(decryptRes.encode('ascii', errors='ignore')))
+     #textfilter.filterinput(decryptRes.encode('ascii', errors='ignore'), i)
+     textfilter.filterinput(decryptRes.encode('ascii', errors='ignore'), i)
 
-# call the parser
-
-t_stop = time.perf_counter()
+textfilter.fileclose()
+t_stop = time.process_time()
 print('Elapsed Time: ', t_stop-t_start, 's')
 
 # xor cyphertext with errors
