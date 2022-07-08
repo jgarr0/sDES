@@ -11,16 +11,16 @@ class filter:
     MIN_LENGTH = ""
 
     def __init__(self, file, rule, min_length):
-        self.FILE = codecs.open(file, "w", encoding='ascii')
+        self.FILE = codecs.open(file, "w", encoding='utf-8')
         self.RULE = rule
         self.MIN_LENGTH = min_length
 
-    def printcyphertext(self, text):
-        self.FILE.write("cyphertext: " + text + "\n")
+    def printcyphertexterror(self, text):
+        self.FILE.write("cyphertext error: " + text + "\n")
 
     def filterinput(self, text, key):
-        newtext = re.sub(self.RULE, "", text.decode('ascii'))
-        if(len(newtext) > int(self.MIN_LENGTH)):
+        newtext = re.sub(self.RULE, "", text.decode('utf-8'))
+        if(len(newtext) >= int(self.MIN_LENGTH)):
             self.FILE.write("\tkey:" + "0x{:03x}".format(key) + "\tplaintext: " + str(newtext) + "\n")
     
     def fileclose(self):
