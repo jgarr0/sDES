@@ -8,8 +8,8 @@ import filter
 from textwrap import wrap
 
 key = 0x0AA
-#plaintext = "Dr. Tran, Look at all of our progress! We can try adding in an error to this now!"
-plaintext = "test"
+plaintext = "Dr. Tran, Look at all of our progress! We can try adding in an error to this now!"
+#plaintext = "test"
 IV = 0x52
 
 print(bytes(plaintext, 'ascii'))
@@ -35,7 +35,7 @@ cipher_bit_length = cipher_byte_length*8
 # initalize filter
 destination = 'filtered_bruteforceresults.txt'
 #textfilter = filter.filter(destination, rule, int(cipher_byte_length/2))
-textfilter = filter.filter(destination, rule, 4)
+textfilter = filter.filter(destination, rule, int((len(test.ciphertext)*0.75)))
 
 # begin introducing error
 for x in range(0, (2**cipher_bit_length)):
@@ -43,7 +43,8 @@ for x in range(0, (2**cipher_bit_length)):
      tempbytes = cipherbytes
      # integer value of error, will increase from 1 -> 2^N - 1
      errorvalue = bin(x)[2:].zfill(cipher_byte_length * 8)
-     print(errorvalue)
+     # print error value
+     #print(errorvalue)
      #  break integer into an error for each byte
      xor_values = wrap(errorvalue[2:], 8)
      # xor each bytes error with original bytes
