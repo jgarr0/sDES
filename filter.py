@@ -20,7 +20,7 @@ class filter:
 
     def filterinput(self, text, key):
         newtext = re.sub(self.RULE, "", text.decode('utf-8'))
-        if(len(newtext) >= int(self.MIN_LENGTH) and newtext == "do"):
+        if(len(newtext) >= int(self.MIN_LENGTH) and newtext == "hi"):
             self.FILE.write("\tkey:" + "0x{:03x}".format(key) + "\tplaintext: " + str(newtext) + "\n")
     
     def fileclose(self):
