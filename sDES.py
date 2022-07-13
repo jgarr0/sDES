@@ -227,10 +227,10 @@ class sDES:
         return self.ciphertext
 
     def decrypt(self, key, IV):
-        c_length = len(self.ciphertext)
-        if(c_length == 1):
-            self.decrypt_block(self.ciphertext, key)
-            return
+        #c_length = len(self.ciphertext)
+        #if(c_length == 1):
+        #    self.decrypt_block(self.ciphertext, key)
+        #    return
         # decrypt many blocks
         self.IV = IV
         tmp = ""

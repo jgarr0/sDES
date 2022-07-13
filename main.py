@@ -37,7 +37,8 @@ while(1):
 
     # encrypt input + display ciphertext
     print("Ciphertext: ", encryptme.encrypt())
-
+    for x in encryptme.ciphertext:
+        print(ord(x))
     # input for this example is known; allow decryption until input achieved
     print("Input has now been encrypted. Input keys until the cyphertext is decrypted successfully")
     decrypt_result = ""
