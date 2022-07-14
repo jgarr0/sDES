@@ -100,9 +100,9 @@ class sDES:
         #print("Second Key: ", self.K2)
 
     def encrypt_block(self, block):
-        if((not self.key or self.key == 0) or (not block or block == 0)):
-            print("You need to provide a non-empty key and plaintext")
-            return
+        #if((not self.key or self.key == 0) or (not block or block == 0)):
+        #    print("You need to provide a non-empty key and plaintext")
+        #    return
         #otherwise encrypt
         #derive keys
         self.deriveKeys()

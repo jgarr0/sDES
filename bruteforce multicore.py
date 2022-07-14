@@ -35,7 +35,7 @@ def multicore_decrypt(sdesobj, rule, IV, start, end):
           xor_values = wrap(errorvalue, 8)
 
           # xor each bytes error with original bytes
-          for z in range(0, cipher_byte_length):
+          for z in range(0, cipher_byte_length):        
                cipherbackup[z] = cipherbytes[z] ^ int(xor_values[z], base=2)
 
           # form test ciphertext
@@ -48,20 +48,20 @@ def multicore_decrypt(sdesobj, rule, IV, start, end):
           textfilter.printcyphertexterror(str(x))
 
           # try all possible key values
-          for i in range(0, 1023):
-               textfilter.filterinput((decryptattempt.decrypt(i, IV)).encode('utf-8'), i)
+          for i in range(0, 1024):
+               textfilter.filterinput((decryptattempt.decrypt(i, IV)).encode('utf-8', errors="ignore"), i)
 
 # main function
 def main():
      # initialize SDES
-     key = 0x2D6
-     plaintext = "hi"
+     key = 0x1C3
+     plaintext = "DR"
      IV = 0x93
      test = sDES.sDES(key, plaintext, IV)
      test.encrypt()
 
      # regular expression to find desirable plaintexts
-     # rule to finlter non prinatable ascii
+     # rule to filter non prinatable ascii
      rule = r"[^a-zA-Z0-9 -~]+"
 
      # timer
@@ -83,7 +83,11 @@ def main():
      print(tempbytes)
      for z in range(0, cipher_byte_length):
           # xor each ciphertext byte with 0-255
-          tempbytes[z] = cipherbytes[z] ^ random.randint(0, 255)
+          tempbytes[z] = cipherbytes[z] ^ random.randint(0, 256)
+          # if tempbytes[z] & 0x80 == 0x80:
+          #       tempbytes[z] = cipherbytes[z] ^ random.randint(0, 63)
+          # else:          
+          #       tempbytes[z] = cipherbytes[z] ^ random.randint(0, 255)
 
      # form new ciphertext
      print("BYTES WITH ERROR: ",tempbytes)
@@ -93,7 +97,7 @@ def main():
 
      # convert cypher text string into a byte array; CONSTANT FOR ALL ITERATIONS
      cipherbytes = bytearray(test.ciphertext, 'utf-8')
-     print(test.decrypt(0x13F, IV))
+     print(cipherbytes)
 
      # multicore decryption
      numcore = mp.cpu_count()

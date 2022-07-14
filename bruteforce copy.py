@@ -10,9 +10,9 @@ import random
 from textwrap import wrap
 
 # initialize SDES
-key = 0x13F
-plaintext = "do"
-IV = 0x6B
+key = 0x2D6
+plaintext = "hi"
+IV = 0x93
 test = sDES.sDES(key, plaintext, IV)
 test.encrypt()
 
@@ -32,7 +32,7 @@ cipher_byte_length = len(test.ciphertext)
 cipher_bit_length = cipher_byte_length*8
 
 # initalize filter
-destination = 'filtered_bruteforceresults.txt'
+destination = 'filtered_bruteforceresults_compare.txt'
 # only save results that contain at least 75% plaintext
 minlength = 0.75
 # apply filter
