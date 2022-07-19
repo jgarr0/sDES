@@ -12,12 +12,12 @@ from textwrap import wrap
 import multiprocessing as mp
 
 def multicore_decrypt(sdesobj, rule, IV, start, end):
-     cipherbytes = bytearray(sdesobj.ciphertext, 'utf-8')
-     print(cipherbytes)
+     cipherbytes = sdesobj.ciphertext
+     print("process cipherbytes: ",  cipherbytes)
      # bytes/bytes in cypher
      cipher_byte_length = len(sdesobj.ciphertext)
      cipher_bit_length = cipher_byte_length*8
-
+     
      # initalize filter
      destination = 'filtered_bruteforceresults_{}_{}.txt'.format(start, end)
      # only save results that contain at least 75% plaintext
@@ -28,7 +28,7 @@ def multicore_decrypt(sdesobj, rule, IV, start, end):
      # decrypt error cyphertext
      for x in range(start, end+1):
           # save ciphertext
-          cipherbackup = cipherbytes
+          cipherbackup = bytearray(cipherbytes)
           errorvalue = bin(int(x))[2:].zfill(cipher_byte_length * 8)
           #print("ERROR VALUE: ", errorvalue)
           #  break integer into an error for each byte
@@ -42,20 +42,20 @@ def multicore_decrypt(sdesobj, rule, IV, start, end):
           error_ciphertext = bytes(cipherbackup)    
 
           decryptattempt = sDES.sDES(0x000, "", IV)
-          decryptattempt.ciphertext = error_ciphertext.decode('utf-8', errors='ignore')
-
+          #decryptattempt.ciphertext = error_ciphertext.decode('utf-8', errors="ignore")
+          decryptattempt.ciphertext = error_ciphertext
           # write cyphertext to output
           textfilter.printcyphertexterror(str(x))
 
           # try all possible key values
           for i in range(0, 1024):
-               textfilter.filterinput((decryptattempt.decrypt(i, IV)).encode('utf-8', errors="ignore"), i)
+               textfilter.filterinput((decryptattempt.decrypt(i, IV)).encode("utf-8"), i)
 
 # main function
 def main():
      # initialize SDES
-     key = 0x1C3
-     plaintext = "DR"
+     key = 0x21F
+     plaintext = "hi"
      IV = 0x93
      test = sDES.sDES(key, plaintext, IV)
      test.encrypt()
@@ -65,14 +65,12 @@ def main():
      rule = r"[^a-zA-Z0-9 -~]+"
 
      # timer
-     # Using process_time returns float of the sum of the system and user CPU time of current process (Excludes time elapsed during sleep & is process wide)
      t_start = time.perf_counter()
 
      # convert cypher text string into a byte array; CONSTANT FOR ALL ITERATIONS
-     cipherbytes = bytearray(test.ciphertext, 'utf-8')
-     print(cipherbytes)
+     cipherbytes = bytearray(test.ciphertext, encoding="utf-8")
      # bytes/bytes in cypher
-     cipher_byte_length = len(test.ciphertext)
+     cipher_byte_length = len(cipherbytes)
      cipher_bit_length = cipher_byte_length*8
 
      # random seed
@@ -80,24 +78,15 @@ def main():
 
      # begin introducing error
      tempbytes = cipherbytes
-     print(tempbytes)
      for z in range(0, cipher_byte_length):
-          # xor each ciphertext byte with 0-255
-          tempbytes[z] = cipherbytes[z] ^ random.randint(0, 256)
-          # if tempbytes[z] & 0x80 == 0x80:
-          #       tempbytes[z] = cipherbytes[z] ^ random.randint(0, 63)
-          # else:          
-          #       tempbytes[z] = cipherbytes[z] ^ random.randint(0, 255)
+          # xor each ciphertext byte with 0-255 inclusi9ve
+          tempbytes[z] = cipherbytes[z] ^ random.randint(0, 255)
 
      # form new ciphertext
      print("BYTES WITH ERROR: ",tempbytes)
      error_ciphertext = bytes(tempbytes)
-     print("PLAINTEXT ERROR:  ",error_ciphertext)
-     test.ciphertext = error_ciphertext.decode('utf-8', errors='ignore')
-
-     # convert cypher text string into a byte array; CONSTANT FOR ALL ITERATIONS
-     cipherbytes = bytearray(test.ciphertext, 'utf-8')
-     print(cipherbytes)
+     print("PLAINTEXT ERROR:  ", str(error_ciphertext, encoding="utf-8", errors="ignore"))
+     test.ciphertext = error_ciphertext
 
      # multicore decryption
      numcore = mp.cpu_count()

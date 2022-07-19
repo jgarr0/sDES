@@ -236,7 +236,7 @@ class sDES:
         tmp = ""
         for byte in self.ciphertext:
             # XOR 1st block with IV
-            plaintext = self.decrypt_block(bin(ord(byte)), key)
+            plaintext = self.decrypt_block(bin(byte), key)
             tmp += chr(int(plaintext, base=2) ^ self.IV)
-            self.IV = ord(byte)
+            self.IV = byte
         return tmp
