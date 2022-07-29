@@ -19,7 +19,7 @@ class filter:
         self.FILE.write("cyphertext error: " + text + "\n")
 
     def filterinput(self, text, key):
-        newtext = re.sub(self.RULE, "", text.decode('utf-8', errors="ignore"))
+        newtext = re.sub(self.RULE, "", text)
         if(len(newtext) > self.MIN_LENGTH):
             self.FILE.write("\tkey:" + "0x{:03x}".format(key) + "\tplaintext: " + str(newtext) + "\n")
     
