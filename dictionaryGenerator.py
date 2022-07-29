@@ -2,6 +2,8 @@ from itertools import permutations
 import sDES
 import re
 
+d = ",.!?/&-:;@'...( "
+
 def main():
     # initialize SDES
     key = 0x21F
@@ -11,9 +13,11 @@ def main():
     test.encrypt()
     value = '00000011' 
     print('Ciphertext: ', test.ciphertext)
-    combinations = set(permutations( value, len(value)))
-    filtered = re.sub(",","",combinations)
-    print('Combinations: ', filtered)
+    combinations = str(set(permutations( value, len(value))))
+    #filtered = re.sub(",","",combinations)
+    filtered = ' '.join(w for w in re.split("["+"\\".join(d)+"]", combinations) if w).replace(" ", "").replace(")", " ")
+    print('Combinations: ', filtered, base=10)
+    print('TYPE: ', type(filtered))
 
 
 # start main process
