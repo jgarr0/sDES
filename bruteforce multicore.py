@@ -55,7 +55,7 @@ def multicore_decrypt(sdesobj, rule, IV, start, end):
 def main():
      # initialize SDES
      key = 0x21F
-     plaintext = "hi"
+     plaintext = "sav"
      IV = 0x93
      test = sDES.sDES(key, plaintext, IV)
      test.encrypt()
@@ -78,9 +78,9 @@ def main():
 
      # begin introducing error
      tempbytes = cipherbytes
-     for z in range(0, cipher_byte_length):
+     #for z in range(0, cipher_byte_length):
           # xor each ciphertext byte with 0-255 inclusi9ve
-          tempbytes[z] = cipherbytes[z] ^ random.randint(0, 255)
+     tempbytes[0] = cipherbytes[0] ^ 128
 
      # form new ciphertext
      print("BYTES WITH ERROR: ",tempbytes)
