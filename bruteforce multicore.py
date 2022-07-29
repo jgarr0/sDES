@@ -80,7 +80,7 @@ def main():
      tempbytes = cipherbytes
      #for z in range(0, cipher_byte_length):
           # xor each ciphertext byte with 0-255 inclusi9ve
-     tempbytes[0] = cipherbytes[0] ^ 128
+     tempbytes[0] = cipherbytes[0] ^ 255
 
      # form new ciphertext
      print("BYTES WITH ERROR: ",tempbytes)
@@ -103,8 +103,8 @@ def main():
           upperbounds[z] = work*(z+1)
 
      # launch decryption method on each core
-     with mp.Pool() as pool:
-          pool.starmap(multicore_decrypt, [(test, rule, IV, lowerbounds[i], upperbounds[i]) for i in range(0, numcore)])
+     #with mp.Pool() as pool:
+     #     pool.starmap(multicore_decrypt, [(test, rule, IV, lowerbounds[i], upperbounds[i]) for i in range(0, numcore)])
 
      # textfilter.fileclose()
      t_stop = time.perf_counter()
