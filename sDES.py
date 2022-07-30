@@ -52,9 +52,9 @@ class sDES:
     def circularLeftShift(self, input):
         numbits = len(input)
         max = int(math.pow(2, numbits)-1)
-        addme = int(0x000)
+        addme = 0
         if(input[0] == '1'):
-            addme = int(0x001)
+            addme = 1
         # left shift
         temp_input = int(input, 2) << 1
         # truncate shift to original size
