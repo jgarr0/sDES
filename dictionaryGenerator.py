@@ -3,8 +3,8 @@ from math import perm
 import os   
 import multiprocessing as mp
 # parameters for maximum ciphertext size (bytes) and number of errors
-MAX_LENGTH = 3
-MAX_ERROR = 4
+MAX_LENGTH = 5
+MAX_ERROR = 1
 
 # generate files
 def filegen(err, len):
