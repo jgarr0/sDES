@@ -2,9 +2,10 @@ from itertools import permutations
 from math import perm
 import os   
 import multiprocessing as mp
+
 # parameters for maximum ciphertext size (bytes) and number of errors
-MAX_LENGTH = 5
-MAX_ERROR = 1
+MAX_LENGTH = 3
+MAX_ERROR = 4
 
 # generate files
 def filegen(err, len):
@@ -23,7 +24,6 @@ def filegen(err, len):
 
 # modified recursion from https://stackoverflow.com/questions/64890117/what-is-the-best-way-to-generate-all-binary-strings-of-the-given-length-in-pytho
 def generator(f, numerror, length, bin = ""):
-
     if(len(bin) == length):
         if(bin.count('1') < numerror+1):
             f.write(str(int(bin, base=2)) + "\n")

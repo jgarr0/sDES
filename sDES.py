@@ -215,8 +215,9 @@ class sDES:
     def encrypt(self):
         p_length = len(self.plaintext)
         if(p_length == 1):
-            self.encrypt_block(ord(self.plaintext))
-            return
+            ciphertext = self.encrypt_block(ord(self.plaintext))
+            self.ciphertext = chr(int(ciphertext, base=2))
+            return self.ciphertext
         # encrypt many blocks
         for byte in self.plaintext:
             # XOR 1st block with IV

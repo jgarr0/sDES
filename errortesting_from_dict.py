@@ -9,10 +9,11 @@ import filter
 import random
 import codecs
 import multiprocessing as mp
+import os
 
 #--------------------------------------------------------------
 # GLOBAL VARIABLES
-NUM_ERRORS = 4
+#NUM_ERRORS = 3
 # rule to filter non prinatable ascii
 RULE = r"[^a-zA-Z0-9 -~]+"
 #--------------------------------------------------------------
@@ -23,7 +24,7 @@ def errorgen(n):
     leftshiftn = random.randint(0, n-1)
     return (1 << leftshiftn)
 
-def multicore_decrypt(errorbytes, length, rule, IV, start, end, corrections):
+def multicore_decrypt(dir, errorbytes, length, rule, IV, start, end, corrections):
     try:
         cipherbytes = errorbytes
         print("process cipher bytes: ", errorbytes)
@@ -35,7 +36,7 @@ def multicore_decrypt(errorbytes, length, rule, IV, start, end, corrections):
         sumcipherbytes = sum(sumcipherbytes)
         
         # initalize filter
-        destination = 'd_filtered_bruteforceresults_{}_{}.txt'.format(start, end)
+        destination = '{}/filtered_bruteforceresults_{}_{}.txt'.format(dir, start, end)
         # only save results that contain at least 75% plaintext
         minlength = 0.75
         # apply filter
@@ -61,14 +62,15 @@ def multicore_decrypt(errorbytes, length, rule, IV, start, end, corrections):
         return
 
 # main function
-def main():
+def adderr(_KEY, _PLAINTEXT, _IV, _NUM_ERRORS):
     # initalize random seed
     random.seed()
 
     # initialize SDES
-    key = 0x27a
-    plaintext = "test"
-    IV = 0x93
+    key = _KEY
+    plaintext = _PLAINTEXT
+    IV = _IV
+
     test = sDES.sDES(key, plaintext, IV)
     test.encrypt()
     print("---------------------------------------------------------------")
@@ -82,7 +84,7 @@ def main():
     # generate error
     errorvalues = set()
     # add values to set to prevent duplicate errors
-    while(len(errorvalues) != NUM_ERRORS):
+    while(len(errorvalues) != _NUM_ERRORS):
         errorvalues.add(errorgen(8*ciphertextlength))
         # add a pause to try and prevent duplicate values
         time.sleep(random.randrange(0, 15, 1)/10)
@@ -130,11 +132,13 @@ def main():
     # multicore decryption
     numcore = mp.cpu_count()
 
-    # open dictionary
+    # open dictionary automatically
+    dict_size = 8*ciphertextlength
+    fname = "./dictionaries/dictionary_{}_errors_{}_bits.txt".format(_NUM_ERRORS, dict_size)
     try:
-        f = open("dictionary.txt", 'r')
+        f = open(fname, 'r')
     except IOError:
-        print("need to provide a dictionary consition of error values to check called 'dictionary.txt'")
+        print("need to provide a dictionary consisting of error values to check called '{}'".format(fname))
         return
 
     # read in corrections + get number of corrections
@@ -159,19 +163,45 @@ def main():
     for i in range(0, numcore):
         corrected_values[i] = corrections[lowerbounds[i]:upperbounds[i]]
 
+    # check if results directory exists
+    dir1 = "./results/"
+    direxist1 = os.path.exists(dir1)
+
+    # create directory for results if nonexistant
+    if not direxist1:
+        try:
+            os.mkdir(dir1)
+        except OSError as error:
+            print(error) 
+
+
+    # check if results directory exists
+    dir2 = "./results/{}_{}_dict_results".format(plaintext, _NUM_ERRORS)
+    direxist2 = os.path.exists(dir2)
+
+    # create directory for results if nonexistant
+    if not direxist2:
+        try:
+            os.mkdir(dir2)
+        except OSError as error:
+            print(error)    
+
     # launch decryption method on each core
     with mp.Pool() as pool:
         try:
-            pool.starmap(multicore_decrypt, [(errortext_bytes, ciphertextlength ,RULE, IV, corrected_values[i][0], corrected_values[i][len(corrected_values[i])-1], corrected_values[i]) for i in range(0, numcore)])
+            pool.starmap(multicore_decrypt, [(dir2, errortext_bytes, ciphertextlength ,RULE, IV, corrected_values[i][0], corrected_values[i][len(corrected_values[i])-1], corrected_values[i]) for i in range(0, numcore)])
         except KeyboardInterrupt:
             print("killed pool of processes")
             pool.terminate()
         else:
             pool.close()
     pool.close()
+
     t_stop = time.perf_counter()
+    totaltime = t_stop-t_start
     print('Elapsed Time: ', t_stop-t_start, 's')
+    return totaltime
 
 # start main process
-if __name__ == "__main__":
-    main()
+#if __name__ == "__main__":
+#    main()
