@@ -55,6 +55,7 @@ def multicore_decrypt(dir, errorbytes, length, rule, IV, start, end):
             # try all possible key values
             for i in range(0, 1024):
                 textfilter.filterinput(decryptattempt.decrypt(i, IV), i)
+        return
     except KeyboardInterrupt:
         return
 
