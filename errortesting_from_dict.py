@@ -148,20 +148,25 @@ def adderr(_KEY, _PLAINTEXT, _IV, _NUM_ERRORS):
     # strip newlines
     for i in range(0, numcorrections):
         corrections[i] = str.strip(corrections[i])
-        
-    # assign work
-    work = int(numcorrections/numcore)
-    upperbounds = [0] * numcore
-    lowerbounds = [0] * numcore
-    for z in range(0, numcore):
-        lowerbounds[z] = work*z
-        upperbounds[z] = work*(z+1)
-    # catch non-even powers of 2
-    upperbounds[numcore-1] = numcorrections
 
-    corrected_values = [0] * numcore
-    for i in range(0, numcore):
-        corrected_values[i] = corrections[lowerbounds[i]:upperbounds[i]]
+    # assign to single core if corections < core count
+    corrected_values = []
+    if(numcorrections < numcore):
+        corrected_values.append(corrections[0:numcorrections])
+    # otherwise, divide up work
+    else:
+        # assign work
+        work = int(numcorrections/numcore)
+        upperbounds = [0] * numcore
+        lowerbounds = [0] * numcore
+        for z in range(0, numcore):
+            lowerbounds[z] = work*z
+            upperbounds[z] = work*(z+1)
+        # catch non-even powers of 2
+        upperbounds[numcore-1] = numcorrections
+
+        for i in range(0, numcore):
+            corrected_values.append(corrections[lowerbounds[i]:upperbounds[i]])
 
     # check if results directory exists
     dir1 = "./results/"
@@ -189,7 +194,7 @@ def adderr(_KEY, _PLAINTEXT, _IV, _NUM_ERRORS):
     # launch decryption method on each core
     with mp.Pool() as pool:
         try:
-            pool.starmap(multicore_decrypt, [(dir2, errortext_bytes, ciphertextlength ,RULE, IV, corrected_values[i][0], corrected_values[i][len(corrected_values[i])-1], corrected_values[i]) for i in range(0, numcore)])
+            pool.starmap(multicore_decrypt, [(dir2, errortext_bytes, ciphertextlength ,RULE, IV, corrected_values[i][0], corrected_values[i][len(corrected_values[i])-1], corrected_values[i]) for i in range(0, len(corrected_values))])
         except KeyboardInterrupt:
             print("killed pool of processes")
             pool.terminate()
