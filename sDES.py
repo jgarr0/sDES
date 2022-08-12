@@ -52,9 +52,9 @@ class sDES:
     def circularLeftShift(self, input):
         numbits = len(input)
         max = int(math.pow(2, numbits)-1)
-        addme = int(0x000)
+        addme = 0
         if(input[0] == '1'):
-            addme = int(0x001)
+            addme = 1
         # left shift
         temp_input = int(input, 2) << 1
         # truncate shift to original size
@@ -100,9 +100,9 @@ class sDES:
         #print("Second Key: ", self.K2)
 
     def encrypt_block(self, block):
-        if((not self.key or self.key == 0) or (not block or block == 0)):
-            print("You need to provide a non-empty key and plaintext")
-            return
+        #if((not self.key or self.key == 0) or (not block or block == 0)):
+        #    print("You need to provide a non-empty key and plaintext")
+        #    return
         #otherwise encrypt
         #derive keys
         self.deriveKeys()
@@ -215,8 +215,9 @@ class sDES:
     def encrypt(self):
         p_length = len(self.plaintext)
         if(p_length == 1):
-            self.encrypt_block(ord(self.plaintext))
-            return
+            ciphertext = self.encrypt_block(ord(self.plaintext))
+            self.ciphertext = chr(int(ciphertext, base=2))
+            return self.ciphertext
         # encrypt many blocks
         for byte in self.plaintext:
             # XOR 1st block with IV
@@ -227,16 +228,22 @@ class sDES:
         return self.ciphertext
 
     def decrypt(self, key, IV):
-        c_length = len(self.ciphertext)
-        if(c_length == 1):
-            self.decrypt_block(self.ciphertext, key)
-            return
+        #c_length = len(self.ciphertext)
+        #if(c_length == 1):
+        #    self.decrypt_block(self.ciphertext, key)
+        #    return
         # decrypt many blocks
         self.IV = IV
         tmp = ""
         for byte in self.ciphertext:
             # XOR 1st block with IV
-            plaintext = self.decrypt_block(bin(ord(byte)), key)
+            try:
+                plaintext = self.decrypt_block(bin(ord(byte)), key)
+            except:
+                plaintext = self.decrypt_block(bin(byte), key)
             tmp += chr(int(plaintext, base=2) ^ self.IV)
-            self.IV = ord(byte)
+            try:
+                self.IV = ord(byte)
+            except:
+                self.IV = byte
         return tmp
