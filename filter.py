@@ -18,6 +18,9 @@ class filter:
     def printcyphertexterror(self, text):
         self.FILE.write("cyphertext error: " + text + "\n")
 
+    def filterprint(self, text):
+        self.FILE.write(text)
+
     def filterinput(self, text, key):
         newtext = re.sub(self.RULE, "", text)
         if(len(newtext) > self.MIN_LENGTH):
